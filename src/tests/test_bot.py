@@ -13,6 +13,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from modules.BinanceRobot import BinanceTraderBot
 from strategies.ema_macd import getEMAMACDTradeStrategy
 from indicators.Indicators import Indicators
+from strategies.talib import getEMAMACDtalib
 
 class TestBinanceTraderBot(unittest.TestCase):
     @classmethod
@@ -58,12 +59,12 @@ class TestBinanceTraderBot(unittest.TestCase):
         """Testa a estratégia EMA MACD"""
         # Cria dados de teste simulando um mercado em tendência de alta
         test_data = pd.DataFrame({
-            'close_price': [100 + i for i in range(30)],  # Preços em tendência de alta
+            'close_price': pd.Series([100.0 + i for i in range(30)], dtype='float64'),  # Preços em tendência de alta
             'open_time': pd.date_range(start='2024-01-01', periods=30, freq='5min')
         })
         
         # Testa se a função retorna um valor booleano
-        result = getEMAMACDTradeStrategy(test_data)
+        result = getEMAMACDtalib(test_data)
         self.assertIsInstance(result, bool)
         print("\n✅ Estratégia EMA MACD funcionando corretamente")
 

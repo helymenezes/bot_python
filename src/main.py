@@ -35,7 +35,7 @@ FALLBACK_ACTIVATED          = True      # Define se a estratégia de Fallback se
 
 
 # Ajustes de Tempo
-CANDLE_PERIOD = Client.KLINE_INTERVAL_5MINUTE # Périodo do candle análisado
+CANDLE_PERIOD = Client.KLINE_INTERVAL_1HOUR # Périodo do candle análisado
 TEMPO_ENTRE_TRADES          = 5 * 60    # Tempo que o bot espera para verificar o mercado (em segundos)
 DELAY_ENTRE_ORDENS          = 15 * 60   # Tempo que o bot espera depois de realizar uma ordem de compra ou venda (ajuda a diminuir trades de borda)
 
@@ -52,18 +52,23 @@ if not API_KEY or not API_SECRET:
     raise ValueError("As chaves da API da Binance não foram configuradas. Configure as variáveis de ambiente BINANCE_API_KEY e BINANCE_SECRET_KEY.")
 
 # Moedas negociadas
-XRP_USDT = AssetStartModel(  stockCode = "BTC",
-                            operationCode = "BTCUSDC",
-                            tradedQuantity = 0.00100,
+COIN_01 = AssetStartModel(  stockCode = "BTC",
+                            operationCode = "BTCUSDT",
+                            tradedQuantity = 0.01000,
                             candlePeriod = CANDLE_PERIOD, volatilityFactor = VOLATILITY_FACTOR, stopLossPercentage = STOP_LOSS_PERCENTAGE, tempoEntreTrades = TEMPO_ENTRE_TRADES, delayEntreOrdens = DELAY_ENTRE_ORDENS, acceptableLossPercentage = ACCEPTABLE_LOSS_PERCENTAGE, fallBackActivated= FALLBACK_ACTIVATED)
 
-SOL_BRL = AssetStartModel(  stockCode = "ETH",
-                            operationCode = "ETBRL",
-                            tradedQuantity = 0.1,
+COIN_02 = AssetStartModel(  stockCode = "ETH",
+                            operationCode = "ETHUSDC",
+                            tradedQuantity = 0.056,
+                            candlePeriod = CANDLE_PERIOD, volatilityFactor = VOLATILITY_FACTOR, stopLossPercentage = STOP_LOSS_PERCENTAGE, tempoEntreTrades = TEMPO_ENTRE_TRADES, delayEntreOrdens = DELAY_ENTRE_ORDENS, acceptableLossPercentage = ACCEPTABLE_LOSS_PERCENTAGE, fallBackActivated= FALLBACK_ACTIVATED)
+
+COIN_03 = AssetStartModel(  stockCode = "BNB",
+                            operationCode = "BNBUSDT",
+                            tradedQuantity = 0.036,
                             candlePeriod = CANDLE_PERIOD, volatilityFactor = VOLATILITY_FACTOR, stopLossPercentage = STOP_LOSS_PERCENTAGE, tempoEntreTrades = TEMPO_ENTRE_TRADES, delayEntreOrdens = DELAY_ENTRE_ORDENS, acceptableLossPercentage = ACCEPTABLE_LOSS_PERCENTAGE, fallBackActivated= FALLBACK_ACTIVATED)
 
 # Array que DEVE CONTER as moedas que serão negociadas
-assetsTraders = [XRP_USDT] 
+assetsTraders = [COIN_01, COIN_02,COIN_03] 
 
 # assetsTraders = [XRP_USDT, SOL_BRL] # Exemplo com mais de uma moeda
 

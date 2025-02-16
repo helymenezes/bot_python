@@ -3,6 +3,8 @@ src/logs/trading_bot.log
 
 src/logs/*.log
 /src/logs/*.log
+/ta-lib-0.4.0-src.tar.gz
+/ta-lib-0.6.4
 
 
 
@@ -137,6 +139,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
 
 # Spyder project settings
 .spyderproject
