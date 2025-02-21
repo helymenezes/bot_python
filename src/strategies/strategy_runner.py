@@ -1,6 +1,6 @@
 #from .moving_average_antecipation import getMovingAverageAntecipationTradeStrategy
 from .moving_average import getMovingAverageTradeStrategy
-from .talib import getEMAMACDtalib
+from .talib import sinal_compra_venda
 
 def runStrategies(stock_data, volatility_factor=0.5, fallback_activated=True):
     """
@@ -10,9 +10,9 @@ def runStrategies(stock_data, volatility_factor=0.5, fallback_activated=True):
     3. Moving Average (fallback)
     """
     # Primeira estratégia: EMA MACD
-    ema_macd_decision = getEMAMACDtalib(stock_data) 
+    ema_macd_decision = sinal_compra_venda(stock_data) 
     if ema_macd_decision is not None:
-        print('Decisão baseada na estratégia EMA MACD')
+        print('Decisão baseada na estratégia EMA/MACD')
         return ema_macd_decision
         
     # Segunda estratégia: MA Antecipation

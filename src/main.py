@@ -29,15 +29,15 @@ def validate_environment():
 
 # Ajustes Técnicos
 VOLATILITY_FACTOR           = 0.5       # Interfere na antecipação e nos lances de compra de venda limitados
-ACCEPTABLE_LOSS_PERCENTAGE  = 0         # (Usar em base 100%) O quando o bot aceita perder de % (se for negativo, o bot só aceita lucro)
-STOP_LOSS_PERCENTAGE        = 3         # (Usar em base 100%) % Máxima de loss que ele aceita para vender à mercado independente
+ACCEPTABLE_LOSS_PERCENTAGE  = 1        # (Usar em base 100%) O quando o bot aceita perder de % (se for negativo, o bot só aceita lucro)
+STOP_LOSS_PERCENTAGE        = 0.025        # (Usar em base 100%) % Máxima de loss que ele aceita para vender à mercado independente
 FALLBACK_ACTIVATED          = True      # Define se a estratégia de Fallback será usada (ela pode entrar comprada em mercados subindo)
 
 
 # Ajustes de Tempo
 CANDLE_PERIOD = Client.KLINE_INTERVAL_1HOUR # Périodo do candle análisado
 TEMPO_ENTRE_TRADES          = 5 * 60    # Tempo que o bot espera para verificar o mercado (em segundos)
-DELAY_ENTRE_ORDENS          = 15 * 60   # Tempo que o bot espera depois de realizar uma ordem de compra ou venda (ajuda a diminuir trades de borda)
+DELAY_ENTRE_ORDENS          = 10 * 60   # Tempo que o bot espera depois de realizar uma ordem de compra ou venda (ajuda a diminuir trades de borda)
 
 
 # Ajustes de Execução
@@ -53,17 +53,17 @@ if not API_KEY or not API_SECRET:
 
 # Moedas negociadas
 COIN_01 = AssetStartModel(  stockCode = "BTC",
-                            operationCode = "BTCUSDT",
+                            operationCode = "BTCBRL",
                             tradedQuantity = 0.01000,
                             candlePeriod = CANDLE_PERIOD, volatilityFactor = VOLATILITY_FACTOR, stopLossPercentage = STOP_LOSS_PERCENTAGE, tempoEntreTrades = TEMPO_ENTRE_TRADES, delayEntreOrdens = DELAY_ENTRE_ORDENS, acceptableLossPercentage = ACCEPTABLE_LOSS_PERCENTAGE, fallBackActivated= FALLBACK_ACTIVATED)
 
 COIN_02 = AssetStartModel(  stockCode = "ETH",
-                            operationCode = "ETHUSDC",
-                            tradedQuantity = 0.056,
+                            operationCode = "ETHBRL",
+                            tradedQuantity = 0.030,
                             candlePeriod = CANDLE_PERIOD, volatilityFactor = VOLATILITY_FACTOR, stopLossPercentage = STOP_LOSS_PERCENTAGE, tempoEntreTrades = TEMPO_ENTRE_TRADES, delayEntreOrdens = DELAY_ENTRE_ORDENS, acceptableLossPercentage = ACCEPTABLE_LOSS_PERCENTAGE, fallBackActivated= FALLBACK_ACTIVATED)
 
 COIN_03 = AssetStartModel(  stockCode = "BNB",
-                            operationCode = "BNBUSDT",
+                            operationCode = "BNRBRL",
                             tradedQuantity = 0.036,
                             candlePeriod = CANDLE_PERIOD, volatilityFactor = VOLATILITY_FACTOR, stopLossPercentage = STOP_LOSS_PERCENTAGE, tempoEntreTrades = TEMPO_ENTRE_TRADES, delayEntreOrdens = DELAY_ENTRE_ORDENS, acceptableLossPercentage = ACCEPTABLE_LOSS_PERCENTAGE, fallBackActivated= FALLBACK_ACTIVATED)
 

@@ -1,83 +1,74 @@
 import pandas as pd
 import talib as ta
-import numpy as np
 
-def getEMAMACDtalib(stock_data: pd.DataFrame, fast_window=7, slow_window=25, signal_window=7) -> bool:
+def sinal_compra_venda(stock_data: pd.DataFrame) -> bool:
     """
-    Estratégia de negociação antecipada baseada em EMAs, MACD e gradientes utilizando TA-Lib.
-    
-    A função utiliza o DataFrame stock_data do BinanceRobot, que contém os dados históricos
-    com a coluna 'close_price' para os preços de fechamento.
+    Função para melhorar os sinais de compra e venda utilizando TA-Lib.
     
     Parâmetros:
-        stock_data (pd.DataFrame): DataFrame contendo os dados históricos do BinanceRobot.
-        fast_window (int): Janela da EMA rápida. Padrão 7.
-        slow_window (int): Janela da EMA lenta. Padrão 25.
-        signal_window (int): Janela da linha de sinal do MACD. Padrão 7.
-    
+        stock_data (pd.DataFrame): DataFrame contendo, no mínimo, a coluna 'close_price'.
+        
     Retorna:
-        Booleano: True se o último sinal for de compra (1); False para venda ou nenhum sinal.
+        bool: True se o último sinal for de compra (1) e False caso contrário.
     """
-    if stock_data is None or stock_data.empty:
-        print("Erro: DataFrame stock_data está vazio ou None")
+    # Verificação de entrada: DataFrame não vazio e coluna 'close_price' existente
+    if stock_data.empty or 'close_price' not in stock_data.columns:
+        print("Erro: DataFrame vazio ou coluna 'close_price' não encontrada.")
         return False
-        
-    if 'close_price' not in stock_data.columns:
-        print("Erro: Coluna 'close_price' não encontrada no DataFrame")
-        return False
-        
-    df = stock_data.copy()
-    # Converter explicitamente para float64
-    close_data = df['close_price'].astype('float64').values
-    
-    # Calcular as EMAs com TA-Lib
-    ema_fast = ta.EMA(close_data, timeperiod=fast_window)
-    ema_slow = ta.EMA(close_data, timeperiod=slow_window)
-    
-    # Calcular MACD e a linha de sinal com TA-Lib
-    macd, signal_line, _ = ta.MACD(close_data, fastperiod=fast_window, slowperiod=slow_window, signalperiod=signal_window)
-    
-    # Converter arrays para Series com o mesmo índice do DataFrame original
-    ema_fast_series = pd.Series(ema_fast, index=df.index)
-    ema_slow_series = pd.Series(ema_slow, index=df.index)
-    macd_series = pd.Series(macd, index=df.index)
-    signal_line_series = pd.Series(signal_line, index=df.index)
-    
-    # Calcular gradientes (diferença entre valores consecutivos)
-    ema_fast_gradiente = ema_fast_series.diff()
-    ema_slow_gradiente = ema_slow_series.diff()
-    macd_diff_gradiente = macd_series.diff()
-    
-    # Adicionar os indicadores ao DataFrame original
-    df['EMA_rapida'] = ema_fast_series
-    df['EMA_lenta'] = ema_slow_series
-    df['MACD'] = macd_series
-    df['Signal_Line'] = signal_line_series
-    df['EMA_rapida_gradiente'] = ema_fast_gradiente
-    df['EMA_lenta_gradiente'] = ema_slow_gradiente
-    df['MACD_diff_gradiente'] = macd_diff_gradiente
-    
-    # Lógica para geração dos sinais
-    condicao_compra = (ema_fast_series < ema_slow_series) & (macd_series > signal_line_series)
-    condicao_venda = (ema_fast_series > ema_slow_series) & (macd_series < signal_line_series)
-    
-    # Detecta os cruzamentos únicos
-    cruzamento_compra = condicao_compra & ~(condicao_compra.shift(1, fill_value=False))
-    cruzamento_venda = condicao_venda & ~(condicao_venda.shift(1, fill_value=False))
-    
-    # Inicializa a coluna de sinais e aplica os cruzamentos
-    df['point_signal'] = 0
-    df.loc[cruzamento_compra, 'point_signal'] = 1
-    df.loc[cruzamento_venda, 'point_signal'] = -1
-    df['point_signal'] = df['point_signal'].replace(0, np.nan).ffill().fillna(0)
-    
-    # Retorna True se o último sinal for de compra (1), convertendo explicitamente para bool Python
-    return bool(df['point_signal'].iloc[-1] == 1)
 
-if __name__ == "__main__":
-    # Exemplo de uso:
-    # Suponha que 'stock_data' seja um DataFrame com os dados históricos,
-    # incluindo a coluna 'close_price' (ou 'close').
-    # Exemplo: stock_data = pd.read_csv('seu_arquivo.csv', parse_dates=['open_time'])
-    resultado = getEMAMACDtalib(stock_data= pd.DataFrame, fast_window=7, slow_window=25, signal_window=7)
-    print("Sinal de compra:", resultado)
+    # Cálculo das médias exponenciais (EMAs)
+    stock_data['EMA7'] = ta.EMA(stock_data['close_price'], timeperiod=7)
+    stock_data['EMA25'] = ta.EMA(stock_data['close_price'], timeperiod=25)
+    stock_data['EMA99'] = ta.EMA(stock_data['close_price'], timeperiod=99)
+
+    # Cálculo do MACD com os parâmetros especificados
+    macd, signal_line, _ = ta.MACD(stock_data['close_price'], fastperiod=7, slowperiod=25, signalperiod=7)
+    stock_data['MACD'] = pd.Series(macd, index=stock_data.index)
+    stock_data['Signal_Line'] = pd.Series(signal_line, index=stock_data.index)
+
+    # Definição da condição de mercado com base na relação entre as EMAs
+    # Valorização: EMA7 > EMA25 > EMA99; Desvalorização: EMA7 < EMA25 < EMA99
+    stock_data['market_condition'] = None
+    cond_valorizacao = (stock_data['EMA7'] > stock_data['EMA25']) & (stock_data['EMA25'] > stock_data['EMA99'])
+    cond_desvalorizacao = (stock_data['EMA7'] < stock_data['EMA25']) & (stock_data['EMA25'] < stock_data['EMA99'])
+    stock_data.loc[cond_valorizacao, 'market_condition'] = 'valorizacao'
+    stock_data.loc[cond_desvalorizacao, 'market_condition'] = 'desvalorizacao'
+
+    # Inicialização da coluna de sinais: 1 para compra, -1 para venda, 0 para sem sinal
+    stock_data['signal'] = 0
+
+    # Estratégia para mercado em valorização: cruzamento da EMA7 com a EMA25
+    # Sinal de compra: quando EMA7 cruza para cima da EMA25
+    compra_valorizacao = cond_valorizacao & (stock_data['EMA7'] > stock_data['EMA25']) & \
+                         (stock_data['EMA7'].shift(1) <= stock_data['EMA25'].shift(1))
+    stock_data.loc[compra_valorizacao, 'signal'] = 1
+
+    # Sinal de venda: quando EMA7 cruza para baixo da EMA25
+    venda_valorizacao = cond_valorizacao & (stock_data['EMA7'] < stock_data['EMA25']) & \
+                        (stock_data['EMA7'].shift(1) >= stock_data['EMA25'].shift(1))
+    stock_data.loc[venda_valorizacao, 'signal'] = -1
+
+    # Estratégia para mercado em desvalorização: baseada no MACD
+    # Sinal de compra: quando EMA7 < EMA25 e MACD > Signal Line
+    compra_desvalorizacao = cond_desvalorizacao & (stock_data['EMA7'] < stock_data['EMA25']) & \
+                            (stock_data['MACD'] > stock_data['Signal_Line'])
+    # Garante que o sinal de compra não se repita consecutivamente
+    stock_data.loc[compra_desvalorizacao & ((stock_data['signal'].shift(1) != 1) | (stock_data['signal'].shift(1).isna())), 'signal'] = 1
+
+    # Sinal de venda: quando EMA7 > EMA25 e MACD < Signal Line
+    venda_desvalorizacao = cond_desvalorizacao & (stock_data['EMA7'] > stock_data['EMA25']) & \
+                           (stock_data['MACD'] < stock_data['Signal_Line'])
+    # Garante que o sinal de venda não se repita consecutivamente
+    stock_data.loc[venda_desvalorizacao & ((stock_data['signal'].shift(1) != -1) | (stock_data['signal'].shift(1).isna())), 'signal'] = -1
+
+    # Preencher os sinais de forma contínua, propagando o último sinal válido
+    stock_data['signal'] = stock_data['signal'].replace(to_replace=0, method='ffill')
+
+    # Retorna True se o último sinal for de compra (1) e False caso contrário
+    final_signal = stock_data['signal'].iloc[-1]
+    return True if final_signal == 1 else False
+
+# Exemplo de uso:
+# df = pd.read_csv("dados_acoes.csv")  # Supondo que 'close_price' esteja presente no CSV
+# resultado = sinal_compra_venda(df)
+# print("Sinal final é de compra?" , resultado)

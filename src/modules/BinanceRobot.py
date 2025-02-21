@@ -16,7 +16,7 @@ from modules.BinanceClient import BinanceClient
 from modules.TraderOrder import TraderOrder
 from modules.Logger import createLogOrder  # Função de log das ordens
 from indicators import Indicators
-from strategies.ema_macd import getEMAMACDTradeStrategy   # Nova importação da estratégia EMA MACD
+from strategies.talib import sinal_compra_venda  # Nova importação da estratégia EMA MACD
 
 # Exemplo de implementação da função de estratégia
 def runStrategies(bot):
@@ -515,7 +515,7 @@ class BinanceTraderBot:
         self.updateAllData(verbose=True)
         # Nova parte: Aplicação da estratégia EMA MACD e impressão do resultado
         if self.stock_data is not None and not self.stock_data.empty:
-            point_signal = getEMAMACDTradeStrategy(self.stock_data)
+            point_signal = sinal_compra_venda(self.stock_data)
             print("\nResultados da estratégia EMA MACD:")
             print(point_signal)
         else:
